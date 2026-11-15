@@ -121,7 +121,7 @@ jobs:
       - name: Tag Docker image
         run: >
           docker image tag docker-ansible
-          ${{ steps.image_name.outputs.image_name }}:latest
+          ${{ steps.image_name.outputs.image_name }}:${{ steps.image_tag.outputs.image_tag }}
 
       - name: Build and push image
         uses: redhat-actions/push-to-registry@v3
@@ -131,4 +131,3 @@ jobs:
           tags: latest
           username: ${{ secrets.REPO_USER }}
           password: ${{ secrets.REPO_PW }}
-        if: false
