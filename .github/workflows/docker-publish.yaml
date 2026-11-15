@@ -9,6 +9,7 @@ on:
       - master
   schedule:
     - cron: "0 4 * * 1"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -89,3 +90,38 @@ jobs:
         run: >-
           docker exec test
           bash -c 'su - ansible -c "sudo true"'
+  
+  release:
+    name: Release image
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: docker-image
+
+      - name: Load Docker image
+        run: docker load < image.tar.gz
+
+      - name: Extract repo name
+        id: image_name
+        run: >-
+          echo "image_name=${GITHUB_REPOSITORY#*-}" >> $GITHUB_OUTPUT
+      
+      - name: Tag Docker image
+        run: >
+          docker image tag docker-ansible
+          ${{ steps.image_name.outputs.image_name }}:latest
+
+      - name: Build and push image
+        uses: redhat-actions/push-to-registry@v3
+        with:
+          registry: quay.io/${{ secrets.REPO_USER }}
+          image: ${{ steps.image_name.outputs.image_name }}
+          tags: latest
+          username: ${{ secrets.REPO_USER }}
+          password: ${{ secrets.REPO_PW }}
+        if: false
