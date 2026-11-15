@@ -109,8 +109,15 @@ jobs:
       - name: Extract repo name
         id: image_name
         run: >-
-          echo "image_name=${GITHUB_REPOSITORY#*-}" >> $GITHUB_OUTPUT
+          _REPO=${GITHUB_REPOSITORY//[0-9\.]/};
+          echo "image_name=${_REPO#*-}" >> $GITHUB_OUTPUT
       
+      - name: Extract repo tag
+        id: image_tag
+        run: >-
+          [[ $VAR =~ [0-9.]+ ]] &&
+          echo "image_tag=${BASH_REMATCH[0]}" >> $GITHUB_OUTPUT
+
       - name: Tag Docker image
         run: >
           docker image tag docker-ansible
@@ -124,4 +131,3 @@ jobs:
           tags: latest
           username: ${{ secrets.REPO_USER }}
           password: ${{ secrets.REPO_PW }}
-        if: false
