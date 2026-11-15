@@ -115,7 +115,7 @@ jobs:
       - name: Extract repo tag
         id: image_tag
         run: >-
-          [[ $VAR =~ [0-9.]+ ]] &&
+          [[ $GITHUB_REPOSITORY =~ [0-9.]+ ]] &&
           echo "image_tag=${BASH_REMATCH[0]}" >> $GITHUB_OUTPUT
 
       - name: Tag Docker image
@@ -131,3 +131,4 @@ jobs:
           tags: latest
           username: ${{ secrets.REPO_USER }}
           password: ${{ secrets.REPO_PW }}
+        if: false
